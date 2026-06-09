@@ -236,7 +236,7 @@ class PhoneBookApp(ctk.CTk):
                                            button_hover_color=COLOR_GOLD_HOV,
                                            dropdown_fg_color=COLOR_CARD,
                                            text_color=COLOR_TEXT_PRI,
-                                           justify="right",
+                                           anchor="e",
                                            command=lambda _: self._search())
         self.unit_menu.pack(side="right", padx=10, pady=12)
 
