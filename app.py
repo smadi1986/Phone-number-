@@ -189,7 +189,8 @@ class PhoneBookApp(ctk.CTk):
 
         # Sidebar Buttons
         self._side_btn("📋 كل جهات الاتصال", self._show_all)
-        self._side_btn("➕ إضافة جهة اتصال",  self._open_add)
+        if self.user["is_admin"]:
+            self._side_btn("➕ إضافة جهة اتصال",  self._open_add)
         self._side_btn("📤 تصدير البيانات",  self._export_csv)
         if self.user["is_admin"]:
             self._side_btn("👤 إدارة المستخدمين", self._manage_users)
@@ -247,13 +248,19 @@ class PhoneBookApp(ctk.CTk):
                                            button_hover_color=COLOR_GOLD_HOV,
                                            dropdown_fg_color=COLOR_CARD,
                                            text_color=COLOR_TEXT_PRI,
+                                           anchor="e",
                                            command=lambda _: self._search())
         self.unit_menu.pack(side="right", padx=10, pady=12)
 
         # Table header
         # Order: Actions | Phone 2 | Phone 1 | Unit | Rank | Name | #
-        COLS = [("إجراءات",130),("هاتف 2",150),("الهاتف الرئيسي",150),
+        COLS = [("هاتف 2",150),("الهاتف الرئيسي",150),
                 ("القسم",180),("الرتبة",150),("الاسم",250),("#",60)]
+
+        # Add Actions column only for admins
+        if self.user["is_admin"]:
+            COLS.insert(0, ("إجراءات",130))
+
         hdr = ctk.CTkFrame(self.content, fg_color=COLOR_CARD, height=45, corner_radius=0, border_width=1, border_color=COLOR_BORDER)
         hdr.pack(fill="x", side="top", padx=10)
         hdr.pack_propagate(False)
@@ -323,6 +330,10 @@ class PhoneBookApp(ctk.CTk):
             rows = db_query("SELECT * FROM contacts ORDER BY name")
 
         units = ["الكل"] + sorted({r["unit"] for r in db_query("SELECT DISTINCT unit FROM contacts") if r["unit"]})
+        # Note: We reverse the sorted list because CustomTkinter OptionMenu might display them in a way
+        # that appears reversed in RTL contexts, or the user wants a specific order.
+        # But looking at the image, the text itself isn't reversed, just maybe the order.
+        # Actually, "anchor='e'" should fix the alignment.
         self.unit_menu.configure(values=units)
 
         for w in self.scroll.winfo_children():
@@ -338,20 +349,21 @@ class PhoneBookApp(ctk.CTk):
 
             rid = r["id"]
 
-            # Actions (Left side of the row in RTL table)
-            act = ctk.CTkFrame(row_f, fg_color="transparent", width=130)
-            act.pack(side="left", padx=5)
-            act.pack_propagate(False)
+            # Actions (Only for Admin)
+            if self.user["is_admin"]:
+                act = ctk.CTkFrame(row_f, fg_color="transparent", width=130)
+                act.pack(side="left", padx=5)
+                act.pack_propagate(False)
 
-            ctk.CTkButton(act, text="✏", width=40, height=35,
-                          fg_color=COLOR_BLUE, hover_color="#1D4ED8",
-                          text_color="white", font=("Arial",14),
-                          command=lambda i=rid: self._open_edit(i)).pack(side="left", padx=5, pady=10)
+                ctk.CTkButton(act, text="✏", width=40, height=35,
+                              fg_color=COLOR_BLUE, hover_color="#1D4ED8",
+                              text_color="white", font=("Arial",14),
+                              command=lambda i=rid: self._open_edit(i)).pack(side="left", padx=5, pady=10)
 
-            ctk.CTkButton(act, text="🗑", width=40, height=35,
-                          fg_color=COLOR_RED, hover_color="#B91C1C",
-                          text_color="white", font=("Arial",14),
-                          command=lambda i=rid: self._delete(i)).pack(side="left", padx=5, pady=10)
+                ctk.CTkButton(act, text="🗑", width=40, height=35,
+                              fg_color=COLOR_RED, hover_color="#B91C1C",
+                              text_color="white", font=("Arial",14),
+                              command=lambda i=rid: self._delete(i)).pack(side="left", padx=5, pady=10)
 
             # Data Columns
             cols_data = [
