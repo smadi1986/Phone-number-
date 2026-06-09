@@ -248,7 +248,7 @@ class PhoneBookApp(ctk.CTk):
                                            button_hover_color=COLOR_GOLD_HOV,
                                            dropdown_fg_color=COLOR_CARD,
                                            text_color=COLOR_TEXT_PRI,
-                                           anchor="e",
+                                           justify="right",
                                            command=lambda _: self._search())
         self.unit_menu.pack(side="right", padx=10, pady=12)
 
@@ -296,6 +296,8 @@ class PhoneBookApp(ctk.CTk):
         win.title(title)
         win.configure(fg_color=COLOR_CARD)
         win.resizable(False, False)
+        win.transient(self)      # Make it stay on top of main window
+        win.grab_set()           # Make it modal
         self._panel = win
 
         # Center top level
@@ -304,9 +306,8 @@ class PhoneBookApp(ctk.CTk):
         ry = self.winfo_y() + (self.winfo_height() - height) // 2
         win.geometry(f"{width}x{height}+{rx}+{ry}")
 
-        win.attributes("-topmost", True)
-        win.after(150, lambda: win.attributes("-topmost", False))
-        win.after(200, win.focus_force)
+        win.lift()               # Bring to front
+        win.focus_force()        # Take focus
 
         # Header
         hdr = ctk.CTkFrame(win, fg_color=COLOR_BG, height=60, corner_radius=0)
@@ -330,10 +331,6 @@ class PhoneBookApp(ctk.CTk):
             rows = db_query("SELECT * FROM contacts ORDER BY name")
 
         units = ["الكل"] + sorted({r["unit"] for r in db_query("SELECT DISTINCT unit FROM contacts") if r["unit"]})
-        # Note: We reverse the sorted list because CustomTkinter OptionMenu might display them in a way
-        # that appears reversed in RTL contexts, or the user wants a specific order.
-        # But looking at the image, the text itself isn't reversed, just maybe the order.
-        # Actually, "anchor='e'" should fix the alignment.
         self.unit_menu.configure(values=units)
 
         for w in self.scroll.winfo_children():
