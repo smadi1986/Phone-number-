@@ -228,8 +228,8 @@ class PhoneBookApp(ctk.CTk):
                                            button_hover_color=COLOR_GOLD_HOV,
                                            dropdown_fg_color=COLOR_CARD,
                                            text_color=COLOR_TEXT_PRI,
-                                           anchor="e",
-                                           command=lambda _: self._search())
+                                           anchor="center",
+                                           command=self._handle_unit_change)
         self.unit_menu.pack(side="right", padx=10, pady=12)
 
         COLS = [("هاتف 2",150),("الهاتف الرئيسي",150),
@@ -289,13 +289,16 @@ class PhoneBookApp(ctk.CTk):
         return body
 
     # ── Data ────────────────────────────────────────────
+    def _handle_unit_change(self, val):
+        self._search()
+
     def _load_contacts(self, rows=None):
         if rows is None:
             rows = db_query("SELECT * FROM contacts ORDER BY name")
 
-        # Fix word order for Arabic in OptionMenu using RLE marker (\u202b)
+        # Use RLM marker (\u200f) at the beginning for better Arabic rendering in the dropdown
         raw_units = sorted({r["unit"] for r in db_query("SELECT DISTINCT unit FROM contacts") if r["unit"]})
-        display_units = ["الكل"] + [f"\u202b{u}\u202c" for u in raw_units]
+        display_units = ["الكل"] + [f"\u200f{u}" for u in raw_units]
         self.unit_menu.configure(values=display_units)
 
         for w in self.scroll.winfo_children():
@@ -328,6 +331,7 @@ class PhoneBookApp(ctk.CTk):
 
     def _search(self):
         q = self.search_var.get().strip()
+        # Clean direction marks for database query
         unit_raw = self.unit_var.get()
         unit = unit_raw.replace("\u202b", "").replace("\u202c", "").replace("\u200f", "").replace("\u200e", "")
 
