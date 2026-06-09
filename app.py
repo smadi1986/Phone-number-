@@ -255,7 +255,7 @@ class PhoneBookApp(ctk.CTk):
                                            button_hover_color=COLOR_GOLD_HOV,
                                            dropdown_fg_color=COLOR_CARD,
                                            text_color=COLOR_TEXT_PRI,
-                                           anchor="center",
+                                           anchor="e",
                                            command=self._handle_unit_change)
         self.unit_menu.pack(side="right", padx=10, pady=12)
 
@@ -334,18 +334,17 @@ class PhoneBookApp(ctk.CTk):
 
     # ── Data ────────────────────────────────────────────
     def _handle_unit_change(self, val):
-        # Clean special direction characters
-        clean_val = val.replace("\u202b", "").replace("\u202c", "").replace("\u200f", "")
-        self.unit_var.set(clean_val)
+        # We don't clean the variable here, so the display stays correct.
+        # We clean only inside the _search method before querying.
         self._search()
 
     def _load_contacts(self, rows=None):
         if rows is None:
             rows = db_query("SELECT * FROM contacts ORDER BY name")
 
-        # Use RLE (\u202b) and PDF (\u202c) to force correct word order in OptionMenu
+        # Use RLM (\u200f) to force correct word order in OptionMenu for Arabic
         raw_units = sorted({r["unit"] for r in db_query("SELECT DISTINCT unit FROM contacts") if r["unit"]})
-        display_units = ["الكل"] + [f"\u202b{u}\u202c" for u in raw_units]
+        display_units = ["الكل"] + [f"\u200f{u}" for u in raw_units]
 
         self.unit_menu.configure(values=display_units)
 
@@ -399,7 +398,11 @@ class PhoneBookApp(ctk.CTk):
 
     def _search(self):
         q = self.search_var.get().strip()
-        unit = self.unit_var.get()
+
+        # Clean direction marks from unit value before querying DB
+        unit_raw = self.unit_var.get()
+        unit = unit_raw.replace("\u202b", "").replace("\u202c", "").replace("\u200f", "").replace("\u200e", "")
+
         params = []
         sql = "SELECT * FROM contacts WHERE 1=1"
         if q:
