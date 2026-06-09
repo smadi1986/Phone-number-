@@ -6,7 +6,7 @@ from tkinter import messagebox, filedialog
 import hashlib
 
 # ─── Configuration & Theme ────────────────────────────────
-ctk.set_appearance_mode("system")  # Default to system
+ctk.set_appearance_mode("dark")  # Default to dark as per original
 ctk.set_default_color_theme("blue")
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "phonebook.db")
@@ -82,13 +82,7 @@ class LoginWindow(ctk.CTk):
         self.configure(fg_color=COLOR_BG)
         self.logged_user = None
         self._build()
-        # Center the window
-        self.update_idletasks()
-        w = self.winfo_width()
-        h = self.winfo_height()
-        extra_x = (self.winfo_screenwidth() // 2) - (w // 2)
-        extra_y = (self.winfo_screenheight() // 2) - (h // 2)
-        self.geometry(f"+{extra_x}+{extra_y}")
+        self.eval('tk::PlaceWindow . center')
 
     def _build(self):
         # Header
@@ -166,13 +160,7 @@ class PhoneBookApp(ctk.CTk):
         self._panel = None
         self._build()
         self._load_contacts()
-        # Center the window
-        self.update_idletasks()
-        w = self.winfo_width()
-        h = self.winfo_height()
-        extra_x = (self.winfo_screenwidth() // 2) - (w // 2)
-        extra_y = (self.winfo_screenheight() // 2) - (h // 2)
-        self.geometry(f"+{extra_x}+{extra_y}")
+        self.eval('tk::PlaceWindow . center')
 
     def _build(self):
         # ── Sidebar (Right Side)
