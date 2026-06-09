@@ -82,7 +82,15 @@ class LoginWindow(ctk.CTk):
         self.configure(fg_color=COLOR_BG)
         self.logged_user = None
         self._build()
-        self.eval('tk::PlaceWindow . center')
+        self._center_window()
+
+    def _center_window(self):
+        self.update_idletasks()
+        width = self.winfo_width()
+        height = self.winfo_height()
+        x = (self.winfo_screenwidth() // 2) - (width // 2)
+        y = (self.winfo_screenheight() // 2) - (height // 2)
+        self.geometry(f'{width}x{height}+{x}+{y}')
 
     def _build(self):
         # Header
@@ -158,9 +166,22 @@ class PhoneBookApp(ctk.CTk):
         self.minsize(1000, 650)
         self.configure(fg_color=COLOR_BG)
         self._panel = None
+
+        # Initialize variables before building UI to avoid trace issues
+        self.search_var = ctk.StringVar()
+        self.unit_var = ctk.StringVar(value="الكل")
+
         self._build()
         self._load_contacts()
-        self.eval('tk::PlaceWindow . center')
+        self._center_window()
+
+    def _center_window(self):
+        self.update_idletasks()
+        width = self.winfo_width()
+        height = self.winfo_height()
+        x = (self.winfo_screenwidth() // 2) - (width // 2)
+        y = (self.winfo_screenheight() // 2) - (height // 2)
+        self.geometry(f'{width}x{height}+{x}+{y}')
 
     def _build(self):
         # ── Sidebar (Right Side)
@@ -209,8 +230,7 @@ class PhoneBookApp(ctk.CTk):
         topbar.pack(fill="x", side="top")
         topbar.pack_propagate(False)
 
-        # Search Bar (Left of topbar, because Arabic is RTL)
-        self.search_var = ctk.StringVar()
+        # Search Bar
         self.search_var.trace_add("write", lambda *_: self._search())
         srch = ctk.CTkEntry(topbar, textvariable=self.search_var,
                             placeholder_text="🔍 بحث بالاسم، الرتبة أو القسم...",
@@ -229,7 +249,6 @@ class PhoneBookApp(ctk.CTk):
 
         ctk.CTkLabel(fbar, text="تصفية حسب القسم:", font=("Arial",13, "bold"),
                      text_color=COLOR_TEXT_PRI).pack(side="right", padx=(0,25), pady=15)
-        self.unit_var = ctk.StringVar(value="الكل")
         self.unit_menu = ctk.CTkOptionMenu(fbar, variable=self.unit_var,
                                            values=["الكل"], width=200, height=35,
                                            fg_color=COLOR_CARD, button_color=COLOR_GOLD,
@@ -580,12 +599,18 @@ class PhoneBookApp(ctk.CTk):
 
 # ─── Entry ────────────────────────────────────────────────
 def main():
-    init_db()
-    login = LoginWindow()
-    login.mainloop()
-    if login.logged_user:
-        app = PhoneBookApp(login.logged_user)
-        app.mainloop()
+    import traceback
+    try:
+        init_db()
+        login = LoginWindow()
+        login.mainloop()
+        if login.logged_user:
+            app = PhoneBookApp(login.logged_user)
+            app.mainloop()
+    except Exception as e:
+        with open("error_log.txt", "w", encoding="utf-8") as f:
+            f.write(traceback.format_exc())
+        messagebox.showerror("خطأ في البرنامج", f"حدث خطأ غير متوقع:\n{str(e)}\n\nتم حفظ التفاصيل في error_log.txt")
 
 if __name__ == "__main__":
     main()
