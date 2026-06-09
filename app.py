@@ -333,18 +333,25 @@ class PhoneBookApp(ctk.CTk):
         return body
 
     # ── Data ────────────────────────────────────────────
+    def _rev_w(self, s):
+        """Reverses word order in a string to fix display in some LTR environments."""
+        if not s or s == "الكل": return s
+        # Split by whitespace and reverse the list of words
+        return " ".join(s.split()[::-1])
+
     def _handle_unit_change(self, val):
-        # We don't clean the variable here, so the display stays correct.
-        # We clean only inside the _search method before querying.
+        # The value passed is what the user selected (which might be word-reversed)
+        # We search using the original value. We'll find it by re-reversing.
+        # But we need to make sure search uses the clean value.
         self._search()
 
     def _load_contacts(self, rows=None):
         if rows is None:
             rows = db_query("SELECT * FROM contacts ORDER BY name")
 
-        # Use RLM (\u200f) to force correct word order in OptionMenu for Arabic
+        # Manually reverse word order for the dropdown to counteract the LTR display issue
         raw_units = sorted({r["unit"] for r in db_query("SELECT DISTINCT unit FROM contacts") if r["unit"]})
-        display_units = ["الكل"] + [f"\u200f{u}" for u in raw_units]
+        display_units = ["الكل"] + [self._rev_w(u) for u in raw_units]
 
         self.unit_menu.configure(values=display_units)
 
@@ -399,9 +406,12 @@ class PhoneBookApp(ctk.CTk):
     def _search(self):
         q = self.search_var.get().strip()
 
-        # Clean direction marks from unit value before querying DB
-        unit_raw = self.unit_var.get()
-        unit = unit_raw.replace("\u202b", "").replace("\u202c", "").replace("\u200f", "").replace("\u200e", "")
+        # Get the value from the menu variable
+        unit_disp = self.unit_var.get()
+
+        # If the value in the menu was word-reversed for display, we need the original for the DB.
+        # Re-reversing "اللغات معهد" gives back "معهد اللغات".
+        unit = self._rev_w(unit_disp)
 
         params = []
         sql = "SELECT * FROM contacts WHERE 1=1"
