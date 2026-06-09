@@ -256,7 +256,7 @@ class PhoneBookApp(ctk.CTk):
                                            dropdown_fg_color=COLOR_CARD,
                                            text_color=COLOR_TEXT_PRI,
                                            anchor="e",
-                                           command=lambda _: self._search())
+                                           command=self._handle_unit_change)
         self.unit_menu.pack(side="right", padx=10, pady=12)
 
         # Table header
@@ -333,12 +333,21 @@ class PhoneBookApp(ctk.CTk):
         return body
 
     # ── Data ────────────────────────────────────────────
+    def _handle_unit_change(self, val):
+        # We need to strip the RLM mark if we used it
+        clean_val = val.replace("\u200f", "")
+        self.unit_var.set(clean_val)
+        self._search()
+
     def _load_contacts(self, rows=None):
         if rows is None:
             rows = db_query("SELECT * FROM contacts ORDER BY name")
 
-        units = ["الكل"] + sorted({r["unit"] for r in db_query("SELECT DISTINCT unit FROM contacts") if r["unit"]})
-        self.unit_menu.configure(values=units)
+        # Use RLM mark (\u200f) to fix word order in OptionMenu for Arabic
+        raw_units = sorted({r["unit"] for r in db_query("SELECT DISTINCT unit FROM contacts") if r["unit"]})
+        display_units = ["الكل"] + [f"\u200f{u}" for u in raw_units]
+
+        self.unit_menu.configure(values=display_units)
 
         for w in self.scroll.winfo_children():
             w.destroy()
