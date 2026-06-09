@@ -255,7 +255,7 @@ class PhoneBookApp(ctk.CTk):
                                            button_hover_color=COLOR_GOLD_HOV,
                                            dropdown_fg_color=COLOR_CARD,
                                            text_color=COLOR_TEXT_PRI,
-                                           anchor="e",
+                                           anchor="center",
                                            command=self._handle_unit_change)
         self.unit_menu.pack(side="right", padx=10, pady=12)
 
@@ -334,8 +334,8 @@ class PhoneBookApp(ctk.CTk):
 
     # ── Data ────────────────────────────────────────────
     def _handle_unit_change(self, val):
-        # We need to strip the RLM mark if we used it
-        clean_val = val.replace("\u200f", "")
+        # Clean special direction characters
+        clean_val = val.replace("\u202b", "").replace("\u202c", "").replace("\u200f", "")
         self.unit_var.set(clean_val)
         self._search()
 
@@ -343,9 +343,9 @@ class PhoneBookApp(ctk.CTk):
         if rows is None:
             rows = db_query("SELECT * FROM contacts ORDER BY name")
 
-        # Use RLM mark (\u200f) to fix word order in OptionMenu for Arabic
+        # Use RLE (\u202b) and PDF (\u202c) to force correct word order in OptionMenu
         raw_units = sorted({r["unit"] for r in db_query("SELECT DISTINCT unit FROM contacts") if r["unit"]})
-        display_units = ["الكل"] + [f"\u200f{u}" for u in raw_units]
+        display_units = ["الكل"] + [f"\u202b{u}\u202c" for u in raw_units]
 
         self.unit_menu.configure(values=display_units)
 
