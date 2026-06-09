@@ -5,22 +5,24 @@ import csv
 from tkinter import messagebox, filedialog
 import hashlib
 
-ctk.set_appearance_mode("dark")
+# ─── Configuration & Theme ────────────────────────────────
+ctk.set_appearance_mode("system")  # Default to system
 ctk.set_default_color_theme("blue")
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "phonebook.db")
 
-DARK_BG    = "#0D1117"
-CARD_BG    = "#161B22"
-BORDER     = "#30363D"
-GOLD       = "#D4A853"
-GOLD_HOVER = "#C49743"
-GOLD_DIM   = "#8B6914"
-TEXT_PRI   = "#E6EDF3"
-TEXT_SEC   = "#8B949E"
-GREEN      = "#3FB950"
-RED        = "#F85149"
-BLUE       = "#58A6FF"
+# Dynamic Colors (Light, Dark)
+COLOR_BG       = ("#F8F9FA", "#0D1117")
+COLOR_CARD     = ("#FFFFFF", "#161B22")
+COLOR_BORDER   = ("#E1E4E8", "#30363D")
+COLOR_TEXT_PRI = ("#24292E", "#E6EDF3")
+COLOR_TEXT_SEC = ("#57606A", "#8B949E")
+COLOR_GOLD     = "#D4A853"
+COLOR_GOLD_HOV = "#C49743"
+COLOR_RED      = "#CF222E"
+COLOR_GREEN    = "#2DA44E"
+COLOR_BLUE     = "#0969DA"
+COLOR_RED_LOW  = ("#FEE2E2", "#450A0A")
 
 # ─── Database ─────────────────────────────────────────────
 def init_db():
@@ -75,48 +77,72 @@ class LoginWindow(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.title("دليل الهاتف المؤسسي")
-        self.geometry("420x520")
+        self.geometry("420x550")
         self.resizable(False, False)
-        self.configure(fg_color=DARK_BG)
+        self.configure(fg_color=COLOR_BG)
         self.logged_user = None
         self._build()
-        self.eval('tk::PlaceWindow . center')
+        # Center the window
+        self.update_idletasks()
+        w = self.winfo_width()
+        h = self.winfo_height()
+        extra_x = (self.winfo_screenwidth() // 2) - (w // 2)
+        extra_y = (self.winfo_screenheight() // 2) - (h // 2)
+        self.geometry(f"+{extra_x}+{extra_y}")
 
     def _build(self):
-        ctk.CTkLabel(self, text="☎", font=("Arial", 56), text_color=GOLD).pack(pady=(50,0))
+        # Header
+        ctk.CTkLabel(self, text="☎", font=("Arial", 64), text_color=COLOR_GOLD).pack(pady=(50,0))
         ctk.CTkLabel(self, text="دليل الهاتف المؤسسي",
-                     font=("Arial", 22, "bold"), text_color=TEXT_PRI).pack(pady=(8,4))
+                     font=("Arial", 24, "bold"), text_color=COLOR_TEXT_PRI).pack(pady=(8,4))
         ctk.CTkLabel(self, text="سجّل دخولك للمتابعة",
-                     font=("Arial", 13), text_color=TEXT_SEC).pack(pady=(0,30))
+                     font=("Arial", 14), text_color=COLOR_TEXT_SEC).pack(pady=(0,30))
 
-        frame = ctk.CTkFrame(self, fg_color=CARD_BG, corner_radius=12,
-                             border_width=1, border_color=BORDER)
-        frame.pack(padx=36, fill="x")
+        # Login Frame
+        frame = ctk.CTkFrame(self, fg_color=COLOR_CARD, corner_radius=15,
+                             border_width=1, border_color=COLOR_BORDER)
+        frame.pack(padx=40, fill="x")
 
         ctk.CTkLabel(frame, text="اسم المستخدم", font=("Arial",13,"bold"),
-                     text_color=TEXT_SEC, anchor="e").pack(padx=20, pady=(20,4), fill="x")
-        self.user_entry = ctk.CTkEntry(frame, height=40, font=("Arial",14),
-                                       fg_color=DARK_BG, border_color=BORDER,
-                                       text_color=TEXT_PRI, justify="right")
-        self.user_entry.pack(padx=20, fill="x")
+                     text_color=COLOR_TEXT_SEC, anchor="e").pack(padx=25, pady=(20,5), fill="x")
+        self.user_entry = ctk.CTkEntry(frame, height=45, font=("Arial",15),
+                                       fg_color=COLOR_BG, border_color=COLOR_BORDER,
+                                       text_color=COLOR_TEXT_PRI, justify="right")
+        self.user_entry.pack(padx=25, fill="x")
 
         ctk.CTkLabel(frame, text="كلمة المرور", font=("Arial",13,"bold"),
-                     text_color=TEXT_SEC, anchor="e").pack(padx=20, pady=(14,4), fill="x")
-        self.pass_entry = ctk.CTkEntry(frame, height=40, font=("Arial",14), show="●",
-                                       fg_color=DARK_BG, border_color=BORDER,
-                                       text_color=TEXT_PRI, justify="right")
-        self.pass_entry.pack(padx=20, fill="x")
+                     text_color=COLOR_TEXT_SEC, anchor="e").pack(padx=25, pady=(15,5), fill="x")
+        self.pass_entry = ctk.CTkEntry(frame, height=45, font=("Arial",15), show="●",
+                                       fg_color=COLOR_BG, border_color=COLOR_BORDER,
+                                       text_color=COLOR_TEXT_PRI, justify="right")
+        self.pass_entry.pack(padx=25, fill="x")
         self.pass_entry.bind("<Return>", lambda e: self._login())
 
-        self.err_lbl = ctk.CTkLabel(frame, text="", font=("Arial",12), text_color=RED)
-        self.err_lbl.pack(pady=(8,0))
+        self.err_lbl = ctk.CTkLabel(frame, text="", font=("Arial",12), text_color=COLOR_RED)
+        self.err_lbl.pack(pady=(10,0))
 
-        ctk.CTkButton(frame, text="دخول", height=42, font=("Arial",15,"bold"),
-                      fg_color=GOLD, hover_color=GOLD_HOVER,
-                      text_color="#000000", command=self._login).pack(padx=20, pady=(10,20), fill="x")
+        ctk.CTkButton(frame, text="دخول", height=45, font=("Arial",16,"bold"),
+                      fg_color=COLOR_GOLD, hover_color=COLOR_GOLD_HOV,
+                      text_color="white", command=self._login).pack(padx=25, pady=(10,25), fill="x")
 
-        ctk.CTkLabel(self, text="المستخدم الافتراضي: admin  |  كلمة المرور: admin123",
-                     font=("Arial",11), text_color=GOLD_DIM).pack(pady=(16,0))
+        # Footer
+        info_frame = ctk.CTkFrame(self, fg_color="transparent")
+        info_frame.pack(pady=20)
+        ctk.CTkLabel(info_frame, text="المستخدم الافتراضي: admin | كلمة المرور: admin123",
+                     font=("Arial",11), text_color=COLOR_TEXT_SEC).pack()
+
+        # Appearance Toggle
+        self.appearance_mode_btn = ctk.CTkButton(self, text="تبديل المظهر", width=100, height=30,
+                                               fg_color="transparent", border_width=1,
+                                               border_color=COLOR_BORDER, text_color=COLOR_TEXT_SEC,
+                                               command=self._toggle_appearance)
+        self.appearance_mode_btn.pack(pady=10)
+
+    def _toggle_appearance(self):
+        if ctk.get_appearance_mode() == "Dark":
+            ctk.set_appearance_mode("Light")
+        else:
+            ctk.set_appearance_mode("Dark")
 
     def _login(self):
         u = self.user_entry.get().strip()
@@ -126,147 +152,169 @@ class LoginWindow(ctk.CTk):
             self.logged_user = dict(rows[0])
             self.destroy()
         else:
-            self.err_lbl.configure(text="❌  اسم المستخدم أو كلمة المرور غير صحيحة")
+            self.err_lbl.configure(text="❌ اسم المستخدم أو كلمة المرور غير صحيحة")
 
 # ─── Main App ─────────────────────────────────────────────
 class PhoneBookApp(ctk.CTk):
     def __init__(self, user):
         super().__init__()
         self.user = user
-        self.title(f"دليل الهاتف المؤسسي  —  {user['username']}")
-        self.geometry("1150x700")
-        self.minsize(950, 580)
-        self.configure(fg_color=DARK_BG)
+        self.title(f"دليل الهاتف المؤسسي — {user['username']}")
+        self.geometry("1200x750")
+        self.minsize(1000, 650)
+        self.configure(fg_color=COLOR_BG)
         self._panel = None
         self._build()
         self._load_contacts()
-        self.eval('tk::PlaceWindow . center')
+        # Center the window
+        self.update_idletasks()
+        w = self.winfo_width()
+        h = self.winfo_height()
+        extra_x = (self.winfo_screenwidth() // 2) - (w // 2)
+        extra_y = (self.winfo_screenheight() // 2) - (h // 2)
+        self.geometry(f"+{extra_x}+{extra_y}")
 
     def _build(self):
-        # ── Sidebar
-        self.sidebar = ctk.CTkFrame(self, width=230, fg_color=CARD_BG,
-                                    corner_radius=0, border_width=1, border_color=BORDER)
-        self.sidebar.pack(side="left", fill="y")
+        # ── Sidebar (Right Side)
+        self.sidebar = ctk.CTkFrame(self, width=250, fg_color=COLOR_CARD,
+                                    corner_radius=0, border_width=1, border_color=COLOR_BORDER)
+        self.sidebar.pack(side="right", fill="y")
         self.sidebar.pack_propagate(False)
 
-        ctk.CTkLabel(self.sidebar, text="☎  الدليل",
-                     font=("Arial",18,"bold"), text_color=GOLD).pack(pady=(24,4))
+        # Sidebar Header
+        ctk.CTkLabel(self.sidebar, text="☎ الدليل",
+                     font=("Arial",22,"bold"), text_color=COLOR_GOLD).pack(pady=(30,5))
         ctk.CTkLabel(self.sidebar, text=f"مرحباً، {self.user['username']}",
-                     font=("Arial",12), text_color=TEXT_SEC).pack(pady=(0,20))
+                     font=("Arial",14), text_color=COLOR_TEXT_SEC).pack(pady=(0,30))
 
-        self._side_btn("📋  كل جهات الاتصال", self._show_all)
-        self._side_btn("➕  إضافة جهة اتصال",  self._open_add)
-        self._side_btn("📤  تصدير Excel / CSV",  self._export_csv)
+        # Sidebar Buttons
+        self._side_btn("📋 كل جهات الاتصال", self._show_all)
+        self._side_btn("➕ إضافة جهة اتصال",  self._open_add)
+        self._side_btn("📤 تصدير البيانات",  self._export_csv)
         if self.user["is_admin"]:
-            self._side_btn("👤  إدارة المستخدمين", self._manage_users)
+            self._side_btn("👤 إدارة المستخدمين", self._manage_users)
 
-        ctk.CTkButton(self.sidebar, text="🚪  تسجيل خروج",
-                      fg_color="transparent", hover_color="#1C2128",
-                      text_color=RED, font=("Arial",13),
-                      command=self._logout).pack(side="bottom", pady=20, padx=16, fill="x")
-        ctk.CTkLabel(self.sidebar, text="v2.2", font=("Arial",10),
-                     text_color=BORDER).pack(side="bottom", pady=(0,6))
+        # Theme Toggle Button in Sidebar
+        self.theme_btn = ctk.CTkButton(self.sidebar, text="🌓 تبديل المظهر",
+                                      fg_color="transparent", hover_color=COLOR_BG,
+                                      text_color=COLOR_TEXT_PRI, font=("Arial",13),
+                                      command=self._toggle_appearance)
+        self.theme_btn.pack(side="bottom", pady=(0, 10), padx=20, fill="x")
+
+        # Logout Button
+        ctk.CTkButton(self.sidebar, text="🚪 تسجيل خروج",
+                      fg_color="transparent", hover_color=COLOR_RED_LOW,
+                      text_color=COLOR_RED, font=("Arial",13, "bold"),
+                      command=self._logout).pack(side="bottom", pady=10, padx=20, fill="x")
+
+        ctk.CTkLabel(self.sidebar, text="v3.0", font=("Arial",10),
+                     text_color=COLOR_TEXT_SEC).pack(side="bottom", pady=(0,10))
 
         # ── Content area
-        self.content = ctk.CTkFrame(self, fg_color=DARK_BG, corner_radius=0)
-        self.content.pack(side="left", fill="both", expand=True)
+        self.content = ctk.CTkFrame(self, fg_color="transparent", corner_radius=0)
+        self.content.pack(side="right", fill="both", expand=True)
 
         # Topbar
-        topbar = ctk.CTkFrame(self.content, fg_color=CARD_BG, height=64,
-                              corner_radius=0, border_width=1, border_color=BORDER)
+        topbar = ctk.CTkFrame(self.content, fg_color=COLOR_CARD, height=80,
+                              corner_radius=0, border_width=1, border_color=COLOR_BORDER)
         topbar.pack(fill="x", side="top")
         topbar.pack_propagate(False)
 
+        # Search Bar (Left of topbar, because Arabic is RTL)
         self.search_var = ctk.StringVar()
         self.search_var.trace_add("write", lambda *_: self._search())
         srch = ctk.CTkEntry(topbar, textvariable=self.search_var,
-                            placeholder_text="🔍  بحث بالاسم أو الرتبة أو القسم...",
-                            height=38, width=400, font=("Arial",13),
-                            fg_color=DARK_BG, border_color=BORDER,
-                            text_color=TEXT_PRI, justify="right")
-        srch.pack(side="right", padx=20, pady=13)
+                            placeholder_text="🔍 بحث بالاسم، الرتبة أو القسم...",
+                            height=42, width=450, font=("Arial",14),
+                            fg_color=COLOR_BG, border_color=COLOR_BORDER,
+                            text_color=COLOR_TEXT_PRI, justify="right")
+        srch.pack(side="right", padx=25, pady=19)
 
-        self.count_lbl = ctk.CTkLabel(topbar, text="", font=("Arial",13), text_color=TEXT_SEC)
-        self.count_lbl.pack(side="left", padx=20)
+        self.count_lbl = ctk.CTkLabel(topbar, text="", font=("Arial",14), text_color=COLOR_TEXT_SEC)
+        self.count_lbl.pack(side="left", padx=25)
 
         # Filter bar
-        fbar = ctk.CTkFrame(self.content, fg_color=DARK_BG, height=46, corner_radius=0)
+        fbar = ctk.CTkFrame(self.content, fg_color="transparent", height=60, corner_radius=0)
         fbar.pack(fill="x", side="top")
         fbar.pack_propagate(False)
 
-        ctk.CTkLabel(fbar, text="فلترة حسب القسم:", font=("Arial",12),
-                     text_color=TEXT_SEC).pack(side="right", padx=(0,12), pady=10)
+        ctk.CTkLabel(fbar, text="تصفية حسب القسم:", font=("Arial",13, "bold"),
+                     text_color=COLOR_TEXT_PRI).pack(side="right", padx=(0,25), pady=15)
         self.unit_var = ctk.StringVar(value="الكل")
         self.unit_menu = ctk.CTkOptionMenu(fbar, variable=self.unit_var,
-                                           values=["الكل"], width=180,
-                                           fg_color=CARD_BG, button_color=GOLD,
-                                           button_hover_color=GOLD_HOVER,
-                                           dropdown_fg_color=CARD_BG,
-                                           text_color=TEXT_PRI,
+                                           values=["الكل"], width=200, height=35,
+                                           fg_color=COLOR_CARD, button_color=COLOR_GOLD,
+                                           button_hover_color=COLOR_GOLD_HOV,
+                                           dropdown_fg_color=COLOR_CARD,
+                                           text_color=COLOR_TEXT_PRI,
                                            command=lambda _: self._search())
-        self.unit_menu.pack(side="right", padx=4, pady=6)
+        self.unit_menu.pack(side="right", padx=10, pady=12)
 
         # Table header
-        # الأعمدة من اليسار لليمين: إجراءات | هاتف2 | هاتف رئيسي | قسم | رتبة | اسم | #
-        COLS = [("إجراءات",120),("هاتف 2",130),("الهاتف الرئيسي",150),
-                ("القسم",160),("الرتبة",140),("الاسم",220),("#",50)]
-        hdr = ctk.CTkFrame(self.content, fg_color="#1C2128", height=36, corner_radius=0)
-        hdr.pack(fill="x", side="top")
+        # Order: Actions | Phone 2 | Phone 1 | Unit | Rank | Name | #
+        COLS = [("إجراءات",130),("هاتف 2",150),("الهاتف الرئيسي",150),
+                ("القسم",180),("الرتبة",150),("الاسم",250),("#",60)]
+        hdr = ctk.CTkFrame(self.content, fg_color=COLOR_CARD, height=45, corner_radius=0, border_width=1, border_color=COLOR_BORDER)
+        hdr.pack(fill="x", side="top", padx=10)
         hdr.pack_propagate(False)
         for txt, w in COLS:
-            ctk.CTkLabel(hdr, text=txt, font=("Arial",12,"bold"),
-                         text_color=GOLD, width=w, anchor="center").pack(side="left", padx=2)
+            ctk.CTkLabel(hdr, text=txt, font=("Arial",13,"bold"),
+                         text_color=COLOR_GOLD, width=w, anchor="center").pack(side="left", padx=2)
 
         # Scrollable list
-        self.scroll = ctk.CTkScrollableFrame(self.content, fg_color=DARK_BG, corner_radius=0)
-        self.scroll.pack(fill="both", expand=True, side="top")
+        self.scroll = ctk.CTkScrollableFrame(self.content, fg_color="transparent", corner_radius=0)
+        self.scroll.pack(fill="both", expand=True, side="top", padx=10, pady=(0, 10))
 
     def _side_btn(self, label, cmd):
-        ctk.CTkButton(self.sidebar, text=label, height=42,
-                      fg_color="transparent", hover_color="#1C2128",
-                      text_color=TEXT_PRI, font=("Arial",13), anchor="e",
-                      command=cmd).pack(padx=10, pady=3, fill="x")
+        ctk.CTkButton(self.sidebar, text=label, height=45,
+                      fg_color="transparent", hover_color=COLOR_BG,
+                      text_color=COLOR_TEXT_PRI, font=("Arial",14), anchor="e",
+                      command=cmd).pack(padx=15, pady=5, fill="x")
 
-    # ── Panel (Toplevel مستقل — الحل الأبسط والأموثوق) ──
+    def _toggle_appearance(self):
+        if ctk.get_appearance_mode() == "Dark":
+            ctk.set_appearance_mode("Light")
+        else:
+            ctk.set_appearance_mode("Dark")
+
     def _close_panel(self):
         if self._panel and self._panel.winfo_exists():
             self._panel.destroy()
         self._panel = None
 
-    def _make_panel(self, title, width=460, height=580):
+    def _make_panel(self, title, width=500, height=650):
         self._close_panel()
 
         win = ctk.CTkToplevel(self)
         win.title(title)
-        win.configure(fg_color=CARD_BG)
+        win.configure(fg_color=COLOR_CARD)
         win.resizable(False, False)
         self._panel = win
 
-        # توسيط النافذة فوق النافذة الرئيسية
+        # Center top level
         self.update_idletasks()
         rx = self.winfo_x() + (self.winfo_width()  - width)  // 2
         ry = self.winfo_y() + (self.winfo_height() - height) // 2
         win.geometry(f"{width}x{height}+{rx}+{ry}")
 
-        # إظهار النافذة فوق كل شيء مع تأخير بسيط لتجنب الشاشة السوداء
         win.attributes("-topmost", True)
         win.after(150, lambda: win.attributes("-topmost", False))
         win.after(200, win.focus_force)
 
         # Header
-        hdr = ctk.CTkFrame(win, fg_color="#1C2128", height=52, corner_radius=0)
+        hdr = ctk.CTkFrame(win, fg_color=COLOR_BG, height=60, corner_radius=0)
         hdr.pack(fill="x")
         hdr.pack_propagate(False)
-        ctk.CTkLabel(hdr, text=title, font=("Arial",15,"bold"),
-                     text_color=GOLD).pack(side="right", padx=16, pady=12)
-        ctk.CTkButton(hdr, text="✕  إغلاق", width=90, height=32,
-                      fg_color=RED, hover_color="#C44040",
-                      text_color="white", font=("Arial",12,"bold"),
-                      command=self._close_panel).pack(side="left", padx=12, pady=10)
+        ctk.CTkLabel(hdr, text=title, font=("Arial",18,"bold"),
+                     text_color=COLOR_GOLD).pack(side="right", padx=20, pady=15)
+        ctk.CTkButton(hdr, text="إلغاء", width=100, height=35,
+                      fg_color=COLOR_RED, hover_color="#B91C1C",
+                      text_color="white", font=("Arial",13,"bold"),
+                      command=self._close_panel).pack(side="left", padx=15, pady=12)
 
-        body = ctk.CTkScrollableFrame(win, fg_color=CARD_BG, corner_radius=0,
-                                      width=width-20, height=height-70)
-        body.pack(fill="both", expand=True)
+        body = ctk.CTkScrollableFrame(win, fg_color="transparent", corner_radius=0,
+                                      width=width-20, height=height-80)
+        body.pack(fill="both", expand=True, padx=10, pady=10)
         return body
 
     # ── Data ────────────────────────────────────────────
@@ -283,42 +331,46 @@ class PhoneBookApp(ctk.CTk):
         self.count_lbl.configure(text=f"إجمالي: {len(rows)} جهة اتصال")
 
         for i, r in enumerate(rows):
-            bg = CARD_BG if i % 2 == 0 else "#111820"
-            row_f = ctk.CTkFrame(self.scroll, fg_color=bg, height=48, corner_radius=0)
-            row_f.pack(fill="x", pady=1)
+            bg = COLOR_CARD if i % 2 == 0 else COLOR_BG
+            row_f = ctk.CTkFrame(self.scroll, fg_color=bg, height=55, corner_radius=8, border_width=1, border_color=COLOR_BORDER)
+            row_f.pack(fill="x", pady=2, padx=5)
             row_f.pack_propagate(False)
 
             rid = r["id"]
 
-            # إجراءات (أقصى اليسار)
-            act = ctk.CTkFrame(row_f, fg_color="transparent", width=120)
-            act.pack(side="left", padx=6)
+            # Actions (Left side of the row in RTL table)
+            act = ctk.CTkFrame(row_f, fg_color="transparent", width=130)
+            act.pack(side="left", padx=5)
             act.pack_propagate(False)
-            ctk.CTkButton(act, text="✏", width=36, height=30,
-                          fg_color=BLUE, hover_color="#3A7FCC",
-                          text_color="white", font=("Arial",13),
-                          command=lambda i=rid: self._open_edit(i)).pack(side="left", padx=3, pady=9)
-            ctk.CTkButton(act, text="🗑", width=36, height=30,
-                          fg_color=RED, hover_color="#C44040",
-                          text_color="white", font=("Arial",13),
-                          command=lambda i=rid: self._delete(i)).pack(side="left", padx=3, pady=9)
 
-            # البيانات من اليسار: هاتف2 | هاتف1 | قسم | رتبة | اسم | #
-            for val, w in [
-                (r["phone2"] or "—", 130),
+            ctk.CTkButton(act, text="✏", width=40, height=35,
+                          fg_color=COLOR_BLUE, hover_color="#1D4ED8",
+                          text_color="white", font=("Arial",14),
+                          command=lambda i=rid: self._open_edit(i)).pack(side="left", padx=5, pady=10)
+
+            ctk.CTkButton(act, text="🗑", width=40, height=35,
+                          fg_color=COLOR_RED, hover_color="#B91C1C",
+                          text_color="white", font=("Arial",14),
+                          command=lambda i=rid: self._delete(i)).pack(side="left", padx=5, pady=10)
+
+            # Data Columns
+            cols_data = [
+                (r["phone2"] or "—", 150),
                 (r["phone1"],        150),
-                (r["unit"] or "—",   160),
-                (r["rank"] or "—",   140),
-                (r["name"],          220),
-                (str(i+1),            50),
-            ]:
-                ctk.CTkLabel(row_f, text=str(val), font=("Arial",13),
-                             text_color=TEXT_PRI, width=w,
+                (r["unit"] or "—",   180),
+                (r["rank"] or "—",   150),
+                (r["name"],          250),
+                (str(i+1),            60),
+            ]
+
+            for val, w in cols_data:
+                ctk.CTkLabel(row_f, text=str(val), font=("Arial",14),
+                             text_color=COLOR_TEXT_PRI, width=w,
                              anchor="center").pack(side="left", padx=2)
 
         if not rows:
-            ctk.CTkLabel(self.scroll, text="لا توجد نتائج",
-                         font=("Arial",15), text_color=TEXT_SEC).pack(pady=60)
+            ctk.CTkLabel(self.scroll, text="لا توجد نتائج بحث",
+                         font=("Arial",16), text_color=COLOR_TEXT_SEC).pack(pady=100)
 
     def _search(self):
         q = self.search_var.get().strip()
@@ -326,8 +378,8 @@ class PhoneBookApp(ctk.CTk):
         params = []
         sql = "SELECT * FROM contacts WHERE 1=1"
         if q:
-            sql += " AND (name LIKE ? OR rank LIKE ? OR unit LIKE ? OR phone1 LIKE ?)"
-            params += [f"%{q}%"] * 4
+            sql += " AND (name LIKE ? OR rank LIKE ? OR unit LIKE ? OR phone1 LIKE ? OR phone2 LIKE ?)"
+            params += [f"%{q}%"] * 5
         if unit != "الكل":
             sql += " AND unit=?"
             params.append(unit)
@@ -350,8 +402,8 @@ class PhoneBookApp(ctk.CTk):
             self._contact_form(dict(rows[0]))
 
     def _contact_form(self, data=None):
-        title = "➕  إضافة جهة اتصال" if not data else "✏  تعديل جهة الاتصال"
-        body = self._make_panel(title, width=460, height=590)
+        title = "➕ إضافة جهة اتصال" if not data else "✏ تعديل جهة الاتصال"
+        body = self._make_panel(title, width=500, height=650)
 
         fields = {}
         specs = [
@@ -364,24 +416,24 @@ class PhoneBookApp(ctk.CTk):
         ]
 
         for label, key in specs:
-            ctk.CTkLabel(body, text=label, font=("Arial",12,"bold"),
-                         text_color=TEXT_SEC, anchor="e").pack(fill="x", padx=16, pady=(12,3))
-            e = ctk.CTkEntry(body, height=38, font=("Arial",13),
-                             fg_color=DARK_BG, border_color=BORDER,
-                             text_color=TEXT_PRI, justify="right")
-            e.pack(fill="x", padx=16)
+            ctk.CTkLabel(body, text=label, font=("Arial",13,"bold"),
+                         text_color=COLOR_TEXT_SEC, anchor="e").pack(fill="x", padx=20, pady=(15,5))
+            e = ctk.CTkEntry(body, height=45, font=("Arial",14),
+                             fg_color=COLOR_BG, border_color=COLOR_BORDER,
+                             text_color=COLOR_TEXT_PRI, justify="right")
+            e.pack(fill="x", padx=20)
             if data and data.get(key):
                 e.insert(0, data[key])
             fields[key] = e
 
-        err = ctk.CTkLabel(body, text="", font=("Arial",12), text_color=RED)
-        err.pack(pady=(8,4))
+        err = ctk.CTkLabel(body, text="", font=("Arial",12), text_color=COLOR_RED)
+        err.pack(pady=(10,5))
 
         def save():
             name  = fields["name"].get().strip()
             phone = fields["phone1"].get().strip()
             if not name or not phone:
-                err.configure(text="❌  الاسم ورقم الهاتف الرئيسي مطلوبان")
+                err.configure(text="❌ الاسم ورقم الهاتف الرئيسي مطلوبان")
                 return
             vals = (
                 name,
@@ -394,57 +446,54 @@ class PhoneBookApp(ctk.CTk):
             if data:
                 db_exec("UPDATE contacts SET name=?,rank=?,unit=?,phone1=?,phone2=?,notes=? WHERE id=?",
                         vals + (data["id"],))
-                msg = f"✅  تم تعديل  '{name}'"
+                msg = f"✅ تم تعديل '{name}'"
             else:
                 db_exec("INSERT INTO contacts (name,rank,unit,phone1,phone2,notes) VALUES (?,?,?,?,?,?)", vals)
-                msg = f"✅  تمت إضافة  '{name}'"
+                msg = f"✅ تمت إضافة '{name}'"
             self._close_panel()
             self._search()
-            self.count_lbl.configure(text=msg)
+            messagebox.showinfo("نجاح", msg)
 
-        ctk.CTkButton(body, text="💾  حفظ", height=44,
-                      fg_color=GOLD, hover_color=GOLD_HOVER,
-                      text_color="#000", font=("Arial",14,"bold"),
-                      command=save).pack(fill="x", padx=16, pady=(4,6))
-
-        ctk.CTkButton(body, text="إلغاء", height=36,
-                      fg_color="transparent", hover_color="#1C2128",
-                      text_color=TEXT_SEC, font=("Arial",13),
-                      command=self._close_panel).pack(fill="x", padx=16, pady=(0,16))
+        ctk.CTkButton(body, text="💾 حفظ البيانات", height=50,
+                      fg_color=COLOR_GOLD, hover_color=COLOR_GOLD_HOV,
+                      text_color="white", font=("Arial",16,"bold"),
+                      command=save).pack(fill="x", padx=20, pady=(10,10))
 
     # ── Delete ───────────────────────────────────────────
     def _delete(self, cid):
         rows = db_query("SELECT name FROM contacts WHERE id=?", (cid,))
         if rows and messagebox.askyesno("تأكيد الحذف",
-                                        f"هل تريد حذف  '{rows[0]['name']}'  من الدليل؟"):
+                                        f"هل أنت متأكد من حذف '{rows[0]['name']}'؟"):
             db_exec("DELETE FROM contacts WHERE id=?", (cid,))
-            self._close_panel()
             self._search()
 
     # ── Export ───────────────────────────────────────────
     def _export_csv(self):
         path = filedialog.asksaveasfilename(defaultextension=".csv",
                                             filetypes=[("CSV","*.csv")],
-                                            title="حفظ الدليل")
+                                            title="تصدير الدليل")
         if not path:
             return
         rows = db_query("SELECT name,rank,unit,phone1,phone2,notes FROM contacts ORDER BY name")
-        with open(path, "w", newline="", encoding="utf-8-sig") as f:
-            w = csv.writer(f)
-            w.writerow(["الاسم","الرتبة","القسم","هاتف 1","هاتف 2","ملاحظات"])
-            for r in rows:
-                w.writerow(list(r))
-        messagebox.showinfo("تم التصدير", f"تم حفظ الملف:\n{path}")
+        try:
+            with open(path, "w", newline="", encoding="utf-8-sig") as f:
+                w = csv.writer(f)
+                w.writerow(["الاسم","الرتبة","القسم","هاتف 1","هاتف 2","ملاحظات"])
+                for r in rows:
+                    w.writerow(list(r))
+            messagebox.showinfo("تم التصدير", f"تم تصدير الدليل بنجاح إلى:\n{path}")
+        except Exception as e:
+            messagebox.showerror("خطأ", f"حدث خطأ أثناء التصدير:\n{e}")
 
     # ── Users ────────────────────────────────────────────
     def _manage_users(self):
-        body = self._make_panel("👤  إدارة المستخدمين", width=460, height=560)
+        body = self._make_panel("👤 إدارة المستخدمين", width=500, height=600)
 
-        ctk.CTkLabel(body, text="المستخدمون الحاليون", font=("Arial",13,"bold"),
-                     text_color=GOLD).pack(pady=(12,6), padx=16, anchor="e")
+        ctk.CTkLabel(body, text="المستخدمون الحاليون", font=("Arial",14,"bold"),
+                     text_color=COLOR_GOLD).pack(pady=(10,10), padx=20, anchor="e")
 
-        list_frame = ctk.CTkFrame(body, fg_color=DARK_BG, corner_radius=8)
-        list_frame.pack(fill="x", padx=16, pady=(0,10))
+        list_frame = ctk.CTkFrame(body, fg_color=COLOR_BG, corner_radius=10, border_width=1, border_color=COLOR_BORDER)
+        list_frame.pack(fill="x", padx=20, pady=(0,20))
 
         def refresh_list():
             for w in list_frame.winfo_children():
@@ -452,59 +501,62 @@ class PhoneBookApp(ctk.CTk):
             users = db_query("SELECT * FROM users ORDER BY is_admin DESC, username")
             if not users:
                 ctk.CTkLabel(list_frame, text="لا يوجد مستخدمون",
-                             font=("Arial",12), text_color=TEXT_SEC).pack(pady=10)
+                             font=("Arial",13), text_color=COLOR_TEXT_SEC).pack(pady=20)
                 return
             for u in users:
-                row = ctk.CTkFrame(list_frame, fg_color=CARD_BG, corner_radius=6)
-                row.pack(fill="x", padx=8, pady=3)
+                row = ctk.CTkFrame(list_frame, fg_color=COLOR_CARD, corner_radius=8, height=50)
+                row.pack(fill="x", padx=10, pady=5)
+                row.pack_propagate(False)
+
                 badge = "👑 مدير" if u["is_admin"] else "👤 مستخدم"
-                ctk.CTkLabel(row, text=f"{u['username']}  ({badge})",
-                             font=("Arial",13), text_color=TEXT_PRI).pack(side="right", padx=10, pady=8)
+                ctk.CTkLabel(row, text=f"{u['username']} ({badge})",
+                             font=("Arial",14), text_color=COLOR_TEXT_PRI).pack(side="right", padx=15, pady=10)
+
                 if u["username"] != "admin":
                     def make_del(uid):
                         return lambda: [db_exec("DELETE FROM users WHERE id=?", (uid,)), refresh_list()]
-                    ctk.CTkButton(row, text="🗑 حذف", width=70, height=28,
-                                  fg_color=RED, hover_color="#C44040",
-                                  text_color="white", font=("Arial",11),
-                                  command=make_del(u["id"])).pack(side="left", padx=8, pady=6)
+                    ctk.CTkButton(row, text="حذف", width=70, height=32,
+                                  fg_color=COLOR_RED, hover_color="#B91C1C",
+                                  text_color="white", font=("Arial",12),
+                                  command=make_del(u["id"])).pack(side="left", padx=10, pady=9)
 
         refresh_list()
 
-        ctk.CTkLabel(body, text="إضافة مستخدم جديد", font=("Arial",13,"bold"),
-                     text_color=GOLD).pack(pady=(16,6), padx=16, anchor="e")
+        ctk.CTkLabel(body, text="إضافة مستخدم جديد", font=("Arial",14,"bold"),
+                     text_color=COLOR_GOLD).pack(pady=(10,10), padx=20, anchor="e")
 
-        add_frame = ctk.CTkFrame(body, fg_color=DARK_BG, corner_radius=8)
-        add_frame.pack(fill="x", padx=16, pady=(0,10))
+        add_frame = ctk.CTkFrame(body, fg_color=COLOR_BG, corner_radius=10, border_width=1, border_color=COLOR_BORDER)
+        add_frame.pack(fill="x", padx=20, pady=(0,10))
 
-        ctk.CTkLabel(add_frame, text="اسم المستخدم", font=("Arial",12),
-                     text_color=TEXT_SEC, anchor="e").pack(fill="x", padx=12, pady=(12,3))
-        nu = ctk.CTkEntry(add_frame, height=36, font=("Arial",13),
-                          fg_color=CARD_BG, border_color=BORDER,
-                          text_color=TEXT_PRI, justify="right")
-        nu.pack(fill="x", padx=12)
+        ctk.CTkLabel(add_frame, text="اسم المستخدم", font=("Arial",13),
+                     text_color=COLOR_TEXT_SEC, anchor="e").pack(fill="x", padx=15, pady=(15,5))
+        nu = ctk.CTkEntry(add_frame, height=40, font=("Arial",14),
+                          fg_color=COLOR_CARD, border_color=COLOR_BORDER,
+                          text_color=COLOR_TEXT_PRI, justify="right")
+        nu.pack(fill="x", padx=15)
 
-        ctk.CTkLabel(add_frame, text="كلمة المرور", font=("Arial",12),
-                     text_color=TEXT_SEC, anchor="e").pack(fill="x", padx=12, pady=(10,3))
-        np_ = ctk.CTkEntry(add_frame, height=36, font=("Arial",13), show="●",
-                           fg_color=CARD_BG, border_color=BORDER,
-                           text_color=TEXT_PRI, justify="right")
-        np_.pack(fill="x", padx=12)
+        ctk.CTkLabel(add_frame, text="كلمة المرور", font=("Arial",13),
+                     text_color=COLOR_TEXT_SEC, anchor="e").pack(fill="x", padx=15, pady=(10,5))
+        np_ = ctk.CTkEntry(add_frame, height=40, font=("Arial",14), show="●",
+                           fg_color=COLOR_CARD, border_color=COLOR_BORDER,
+                           text_color=COLOR_TEXT_PRI, justify="right")
+        np_.pack(fill="x", padx=15)
 
         adm_var = ctk.BooleanVar(value=False)
-        ctk.CTkCheckBox(add_frame, text="منح صلاحية المدير", variable=adm_var,
-                        text_color=TEXT_PRI, font=("Arial",12)).pack(padx=12, pady=10, anchor="e")
+        ctk.CTkCheckBox(add_frame, text="منح صلاحيات مسؤول (مدير)", variable=adm_var,
+                        text_color=COLOR_TEXT_PRI, font=("Arial",13)).pack(padx=15, pady=15, anchor="e")
 
-        err_lbl = ctk.CTkLabel(add_frame, text="", font=("Arial",11), text_color=RED)
+        err_lbl = ctk.CTkLabel(add_frame, text="", font=("Arial",12), text_color=COLOR_RED)
         err_lbl.pack()
 
         def add_user():
             u2 = nu.get().strip()
             p2 = np_.get().strip()
             if not u2 or not p2:
-                err_lbl.configure(text="❌  أدخل اسم المستخدم وكلمة المرور", text_color=RED)
+                err_lbl.configure(text="❌ يرجى إدخال البيانات المطلوبة", text_color=COLOR_RED)
                 return
             if len(p2) < 4:
-                err_lbl.configure(text="❌  كلمة المرور 4 أحرف على الأقل", text_color=RED)
+                err_lbl.configure(text="❌ كلمة المرور قصيرة جداً (4 أحرف كحد أدنى)", text_color=COLOR_RED)
                 return
             pw2 = hashlib.sha256(p2.encode()).hexdigest()
             try:
@@ -513,19 +565,19 @@ class PhoneBookApp(ctk.CTk):
                 nu.delete(0, "end")
                 np_.delete(0, "end")
                 adm_var.set(False)
-                err_lbl.configure(text=f"✅  تمت إضافة '{u2}'", text_color=GREEN)
+                err_lbl.configure(text=f"✅ تم إضافة المستخدم '{u2}'", text_color=COLOR_GREEN)
                 refresh_list()
             except Exception:
-                err_lbl.configure(text="❌  اسم المستخدم موجود مسبقاً", text_color=RED)
+                err_lbl.configure(text="❌ اسم المستخدم موجود بالفعل", text_color=COLOR_RED)
 
-        ctk.CTkButton(add_frame, text="➕  إضافة المستخدم", height=38,
-                      fg_color=GREEN, hover_color="#2EA043",
-                      text_color="white", font=("Arial",13,"bold"),
-                      command=add_user).pack(fill="x", padx=12, pady=(4,14))
+        ctk.CTkButton(add_frame, text="➕ إضافة المستخدم", height=45,
+                      fg_color=COLOR_GREEN, hover_color="#166534",
+                      text_color="white", font=("Arial",14,"bold"),
+                      command=add_user).pack(fill="x", padx=15, pady=(5,20))
 
     # ── Logout ───────────────────────────────────────────
     def _logout(self):
-        if messagebox.askyesno("تسجيل خروج", "هل تريد تسجيل الخروج؟"):
+        if messagebox.askyesno("تسجيل خروج", "هل أنت متأكد من رغبتك في تسجيل الخروج؟"):
             self.destroy()
             main()
 
