@@ -90,9 +90,9 @@ class LoginWindow(ctk.CTk):
 
     def _build(self):
         ctk.CTkLabel(self, text="☎", font=("Arial", 64), text_color=COLOR_GOLD).pack(pady=(50,0))
-        ctk.CTkLabel(self, text="دليل الهاتف المؤسسي",
+        ctk.CTkLabel(self, text="\u202bدليل الهاتف المؤسسي\u202c",
                      font=("Arial", 24, "bold"), text_color=COLOR_TEXT_PRI).pack(pady=(8,4))
-        ctk.CTkLabel(self, text="سجّل دخولك للمتابعة",
+        ctk.CTkLabel(self, text="\u202bسجّل دخولك للمتابعة\u202c",
                      font=("Arial", 14), text_color=COLOR_TEXT_SEC).pack(pady=(0,30))
 
         frame = ctk.CTkFrame(self, fg_color=COLOR_CARD, corner_radius=15,
@@ -174,14 +174,14 @@ class PhoneBookApp(ctk.CTk):
         ctk.CTkLabel(self.sidebar, text=f"مرحباً، {self.user['username']}",
                      font=("Arial",14), text_color=COLOR_TEXT_SEC).pack(pady=(0,30))
 
-        self._side_btn("📋 كل جهات الاتصال", self._show_all)
+        self._side_btn("\u202b📋 كل جهات الاتصال\u202c", self._show_all)
         if self.user["is_admin"]:
-            self._side_btn("➕ إضافة جهة اتصال",  self._open_add)
-            self._side_btn("📥 استيراد من Excel", self._import_excel)
-        self._side_btn("📤 تصدير البيانات",  self._export_csv)
+            self._side_btn("\u202b➕ إضافة جهة اتصال\u202c",  self._open_add)
+            self._side_btn("\u202b📥 استيراد من Excel\u202c", self._import_excel)
+        self._side_btn("\u202b📤 تصدير البيانات\u202c",  self._export_csv)
         if self.user["is_admin"]:
-            self._side_btn("💾 نسخة احتياطية", self._manage_backup)
-            self._side_btn("👤 إدارة المستخدمين", self._manage_users)
+            self._side_btn("\u202b💾 نسخة احتياطية\u202c", self._manage_backup)
+            self._side_btn("\u202b👤 إدارة المستخدمين\u202c", self._manage_users)
 
         self.theme_btn = ctk.CTkButton(self.sidebar, text="🌓 تبديل المظهر",
                                       fg_color="transparent", hover_color=COLOR_BG,
@@ -220,7 +220,7 @@ class PhoneBookApp(ctk.CTk):
         fbar.pack(fill="x", side="top")
         fbar.pack_propagate(False)
 
-        ctk.CTkLabel(fbar, text="تصفية حسب القسم:", font=("Arial",13, "bold"),
+        ctk.CTkLabel(fbar, text="\u202bتصفية حسب القسم:\u202c", font=("Arial",13, "bold"),
                      text_color=COLOR_TEXT_PRI).pack(side="right", padx=(0,25), pady=15)
         self.unit_menu = ctk.CTkOptionMenu(fbar, variable=self.unit_var,
                                            values=["الكل"], width=200, height=35,
@@ -393,11 +393,12 @@ class PhoneBookApp(ctk.CTk):
 
     # ── Backup ───────────────────────────────────────────
     def _manage_backup(self):
-        body = self._make_panel("💾 النسخ الاحتياطي", width=500, height=400)
-        ctk.CTkLabel(body, text="حماية البيانات", font=("Arial", 16, "bold"), text_color=COLOR_GOLD).pack(pady=20)
-        ctk.CTkButton(body, text="💾 إنشاء نسخة احتياطية", height=50, fg_color=COLOR_GREEN, command=self._backup_db).pack(fill="x", padx=40, pady=10)
+        # Apply RLE marker (\u202b) to fix Arabic word order on buttons and titles
+        body = self._make_panel("\u202b💾 النسخ الاحتياطي\u202c", width=500, height=400)
+        ctk.CTkLabel(body, text="\u202bحماية البيانات\u202c", font=("Arial", 16, "bold"), text_color=COLOR_GOLD).pack(pady=20)
+        ctk.CTkButton(body, text="\u202b💾 إنشاء نسخة احتياطية\u202c", height=50, fg_color=COLOR_GREEN, command=self._backup_db).pack(fill="x", padx=40, pady=10)
         ctk.CTkFrame(body, height=2, fg_color=COLOR_BORDER).pack(fill="x", padx=20, pady=30)
-        ctk.CTkButton(body, text="🔄 استعادة نسخة احتياطية", height=50, fg_color=COLOR_RED, command=self._restore_db).pack(fill="x", padx=40, pady=10)
+        ctk.CTkButton(body, text="\u202b🔄 استعادة نسخة احتياطية\u202c", height=50, fg_color=COLOR_RED, command=self._restore_db).pack(fill="x", padx=40, pady=10)
 
     def _backup_db(self):
         path = filedialog.asksaveasfilename(defaultextension=".db", filetypes=[("DB Files", "*.db")], title="حفظ")
